@@ -71,45 +71,81 @@ if __name__ == "__main__":
 
 ```
 
-##### C. Tests de l’API
+##### C. Désactivation du mode automatique des LEDs
+*Avant de tester l'API il est important de désactiver le mode automatique des LEDs pour pouvoir prendre la main dessus et éviter qu'elles s'allument ou s'éteignent automatiquement*
+```bash
+echo none | sudo tee /sys/class/leds/ACT/trigger
+echo none | sudo tee /sys/class/leds/PWR/trigger
+```
+
+<img width="678" height="69" alt="image" src="https://github.com/user-attachments/assets/ca1a5de9-6481-4c84-bf02-8e0be038cb6c" />
+
+##### D. Tests de l’API
 *Preuve que la Raspberry Pi répond aux requêtes HTTP via son adresse IP :*
 
- Verification de l'état des LEDs
-```bash
-curl http://192.168.1.33:7000/status
-```
- Résultat: 
+##### Verification de l'état des LEDs:
+
+<img width="536" height="122" alt="image" src="https://github.com/user-attachments/assets/52423091-b9e2-4ebd-9896-bb6851bd647a" />
+
+On peut donc voir qu'ici les deux LEDs sont éteintes
 
 
+##### Allumer la led verte:
 
-Allumer la led verte:
 <img width="676" height="36" alt="image" src="https://github.com/user-attachments/assets/86aad464-662d-406c-8be7-8c1d504e504b" />
 
+On peut vérifer l'état des LED pour voir le changement:
+
+<img width="547" height="122" alt="image" src="https://github.com/user-attachments/assets/4bae3b10-0399-40a3-967f-b7adb1b13a8a" />
+
+La LED verte est maintenant allumée au maximum de son intensité (255)
 
 
-Eteindre la led verte:
+##### Eteindre la led verte:
+
 <img width="680" height="38" alt="image" src="https://github.com/user-attachments/assets/ad15266b-0f89-492c-8586-ec8fc89bb4a1" />
 
 
+##### Allumer la led rouge:
 
-Allumer la led rouge:
 <img width="667" height="32" alt="image" src="https://github.com/user-attachments/assets/ff59e700-fc42-4d05-a52a-b0f3e06bc68a" />
 
 
 
+##### Eteindre la led rouge: 
 
-
-Eteindre la led rouge: 
 <img width="689" height="37" alt="image" src="https://github.com/user-attachments/assets/e9bf28b1-6d40-467d-acc6-644106b81cb5" />
 
 
 
 
 
-##### D. Démarrage automatique avec systemd
+##### E. Démarrage automatique avec systemd
 *Configuration permettant de lancer automatiquement l’API au démarrage de la Raspberry Pi*
 
 Demarrage du service: 
 ```bash
 sudo nano /etc/systemd/system/smartglow.service
 ```
+Contenu du service:
+
+<img width="485" height="242" alt="Capture d&#39;écran 2026-05-21 131854" src="https://github.com/user-attachments/assets/732ad5c6-cefd-4192-9a65-d61d04d7b263" />
+
+Activation du service:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable smartglow
+sudo systemctl start smartglow
+```
+
+Verification:
+```bash
+sudo systemctl status smartglow
+```
+
+Résultat:
+
+<img width="800" height="197" alt="Capture d&#39;écran 2026-05-21 132248" src="https://github.com/user-attachments/assets/759c4b59-b2a2-437a-9552-dfa67ae48a18" />
+
+On voit ici qu'il est "enabled" donc le lancement automatique est bien activé
+
