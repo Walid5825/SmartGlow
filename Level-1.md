@@ -13,11 +13,15 @@ Ce premier niveau m'a permis de configurer l'environnement de base de la Raspber
 
 ##### A. Connexion SSH réussie
 *Capture d'écran de mon terminal lors de la première connexion à la Raspberry Pi :*
-![Connexion SSH](./screenshots-level1/ssh_connexion.png)
+
+<img width="849" height="163" alt="ssh_connexion" src="https://github.com/user-attachments/assets/5c2c9316-0ce7-4686-999d-c2da205d3d9e" />
+
 
 ##### B. Accès aux fichiers système des LEDs
-*Preuve que les dossiers `ACT` (verte) et `PWR` (rouge) sont bien présents dans `/sys/class/leds/` :*
-![Dossier des LEDs](./screenshots-level1/led_sys.png)
+*Preuve que les dossiers ACT (verte) et PWR (rouge) sont bien présents dans `/sys/class/leds/` :*
+
+<img width="361" height="35" alt="led_sys" src="https://github.com/user-attachments/assets/104231fb-b8d8-4dc6-b8b3-afc7fea32868" />
+
 
 #### 📦 Livrable : Script Python de test (`leds.py`)
 Le script ci-dessous permet de modifier la valeur du fichier `brightness` (0 pour éteindre, 1 pour allumer) pour faire clignoter les LEDs verte (ACT) et rouge (PWR) :
