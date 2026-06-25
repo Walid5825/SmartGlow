@@ -106,27 +106,6 @@ def ledRouge_on():
         "ok": ok,
         "rouge": 1
     })
-@jwt_required()
-def ledVerte_off():
-
-    ok = changer_etat_led(ledVerte, 0)
-
-    return jsonify({
-        "ok": ok,
-        "verte": 0
-    })
-
-
-@app.route("/led/rouge/on", methods=["POST"])
-@jwt_required()
-def ledRouge_on():
-
-    ok = changer_etat_led(ledRouge, 1)
-
-    return jsonify({
-        "ok": ok,
-        "rouge": 1
-    })
 
 @app.route("/led/rouge/off", methods=["POST"])
 @jwt_required()
