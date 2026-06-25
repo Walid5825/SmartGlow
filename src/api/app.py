@@ -1,31 +1,69 @@
-from flask import Flask, jsonify # Import de Flask pour créer l'API
-from flask_cors import CORS # Permet d'autoriser les requêtes depuis le navigateur (Next.js)
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    jwt_required
+)
+from datetime import timedelta
 
-app = Flask("SmartGlow") # Création de l'application Flask
-
-CORS(app) # Active CORS pour permettre la communication avec le frontend
-
-# Chemin vers les fichiers système des LEDs de la Raspberry Pi
-# ACT = LED verte
-# PWR = LED rouge
-ledVerte="/sys/class/leds/ACT/brightness"
-ledRouge="/sys/class/leds/PWR/brightness"
-
-
-# Fonction pour changer l'état d'une LED
-# valeur = 1 (allumé) ou 0 (éteint)
-def changer_etat_led(led,valeur):
-        open(led,"w").write(str(valeur)) # On écrit la valeur dans le fichier système de la LED
+app = Flask("SmartGlow")
+CORS(app)
 
 
-# Fonction pour lire l'état d'une LED
+app.config["JWT_SECRET_KEY"] = "SECRETSMARTGLOW2026"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
+
+jwt = JWTManager(app)
+
+ledVerte = "/sys/class/leds/ACT/brightness"
+ledRouge = "/sys/class/leds/PWR/brightness"
+
+
+def changer_etat_led(led, valeur):
+    try:
+        import subprocess
+        subprocess.run(f"echo {valeur} | sudo tee {led}", shell=True)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
 def etat_led(led):
-    return int(open(led,"r").read().strip()) # On lit la valeur du fichier et on enlève les espaces / retours ligne
+    try:
+        with open(led, "r") as f:
+            return int(f.read().strip())
+
+    except Exception as e:
+        print(f"[LED READ ERROR] {led} -> {e}")
+        return 0
 
 
-# Endpoint GET /status
-# Permet de récupérer l'état des LEDs
+@app.route("/login", methods=["POST"])
+def login():
+
+    data = request.get_json()
+
+    email = data.get("email")
+    password = data.get("password")
+
+    if email == "admin@test.com" and password == "admin123":
+
+        token = create_access_token(identity=email)
+
+        return jsonify({
+            "token": token,
+            "email": email
+        })
+
+    return jsonify({
+        "message": "Email ou mot de passe incorrect"
+    }), 401
+
+
+
 @app.route("/status", methods=["GET"])
+@jwt_required()
 def status():
 
     return jsonify({
@@ -34,39 +72,73 @@ def status():
     })
 
 
-# Endpoint POST pour ALLUMER la LED verte
+
 @app.route("/led/verte/on", methods=["POST"])
+@jwt_required()
 def ledVerte_on():
 
-        changer_etat_led(ledVerte,1)
-        return {"message": "LED verte ON"}
+    ok = changer_etat_led(ledVerte, 1)
 
+    return jsonify({
+        "ok": ok,
+        "verte": 1
+    })
 
-# Endpoint POST pour ÉTEINDRE la LED verte
-@app.route("/led/verte/off", methods=["POST"])
+@jwt_required()
 def ledVerte_off():
 
-        changer_etat_led(ledVerte,0)
-        return {"message": "LED verte OFF"}
+    ok = changer_etat_led(ledVerte, 0)
+
+    return jsonify({
+        "ok": ok,
+        "verte": 0
+    })
 
 
-# Endpoint POST pour ALLUMER la LED rouge
+
 @app.route("/led/rouge/on", methods=["POST"])
+@jwt_required()
 def ledRouge_on():
 
-        changer_etat_led(ledRouge,1)
-        return {"message": "LED rouge ON"}
+    ok = changer_etat_led(ledRouge, 1)
+
+    return jsonify({
+        "ok": ok,
+        "rouge": 1
+    })
+@jwt_required()
+def ledVerte_off():
+
+    ok = changer_etat_led(ledVerte, 0)
+
+    return jsonify({
+        "ok": ok,
+        "verte": 0
+    })
 
 
-# Endpoint POST pour ÉTEINDRE la LED rouge
+@app.route("/led/rouge/on", methods=["POST"])
+@jwt_required()
+def ledRouge_on():
+
+    ok = changer_etat_led(ledRouge, 1)
+
+    return jsonify({
+        "ok": ok,
+        "rouge": 1
+    })
+
 @app.route("/led/rouge/off", methods=["POST"])
+@jwt_required()
 def ledRouge_off():
 
-        changer_etat_led(ledRouge,0)
-        return {"message": "LED rouge OFF"}
+    ok = changer_etat_led(ledRouge, 0)
+
+    return jsonify({
+        "ok": ok,
+        "rouge": 0
+    })
 
 
-# Lancement du serveur Flask
-# Accessible sur le réseau local (Raspberry Pi + autres appareils)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=7000)
